@@ -53,7 +53,7 @@ export class AuthService {
       usuario.email,
     );
 
-    return { access_token, refresh_token };
+    return { usuario, access_token, refresh_token };
   }
 
   async login(usuario: Omit<Usuario, 'senha'>) {
@@ -62,7 +62,7 @@ export class AuthService {
       usuario.email,
     );
 
-    return { access_token, refresh_token };
+    return { usuario, access_token, refresh_token };
   }
 
   async reautenticar(usuario: Omit<Usuario, 'senha'>) {
