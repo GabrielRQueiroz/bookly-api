@@ -1,0 +1,124 @@
+generator client {
+  provider               = "prisma-client"
+  output                 = "../generated/prisma"
+  generatedFileExtension = "ts"
+  moduleFormat           = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Livro {
+  id            Int            @id @default(autoincrement())
+  titulo        String
+  capaUrl       String?
+  editoraId     Int
+  formato       Formato        @default(FISICO)
+  status        StatusLivro    @default(PENDENTE)
+  editora       Editora        @relation(fields: [editoraId], references: [id])
+  autores       Autor[]        @relation("LivroAutores")
+  generos       Genero[]       @relation("LivroGeneros")
+  livroEstantes LivroEstante[]
+  // livroObservacaos LivroObservacao[]
+
+  @@index([titulo])
+}
+
+model Autor {
+  id            Int     @id @default(autoincrement())
+  nomeComum     String  @unique
+  nomeCompleto  String?
+  nacionalidade String?
+  livros        Livro[] @relation("LivroAutores")
+}
+
+model Genero {
+  id      Int     @id @default(autoincrement())
+  nome    String  @unique
+  corHexa String  @default("#611066")
+  livros  Livro[] @relation("LivroGeneros")
+}
+
+// model Observacao {
+//   id               Int               @id @default(autoincrement())
+//   nome             String
+//   livroObservacaos LivroObservacao[]
+// }
+
+// model LivroObservacao {
+//   livroId      Int
+//   observacaoId Int
+//   valor        Int @default(0)
+
+//   livro      Livro      @relation(fields: [livroId], references: [id])
+//   observacao Observacao @relation(fields: [observacaoId], references: [id])
+
+//   @@id([livroId, observacaoId])
+// }
+
+model Editora {
+  id     Int     @id @default(autoincrement())
+  nome   String  @unique
+  livros Livro[]
+}
+
+model Estante {
+  id              Int              @id @default(autoincrement())
+  nome            String           @unique
+  linhas          Int
+  colunas         Int
+  livros          LivroEstante[]
+  estanteUsuarios EstanteUsuario[]
+}
+
+model Usuario {
+  id              String           @id @default(uuid())
+  criadoEm        DateTime         @default(now())
+  email           String           @unique
+  senha           String
+  nome            String?
+  avatarUrl       String?
+  estanteUsuarios EstanteUsuario[]
+}
+
+model EstanteUsuario {
+  id        Int          @id @default(autoincrement())
+  estanteId Int
+  usuarioId String
+  cargo     EstanteCargo @default(MEMBRO)
+  estante   Estante      @relation(fields: [estanteId], references: [id])
+  usuario   Usuario      @relation(fields: [usuarioId], references: [id])
+
+  @@unique([estanteId, usuarioId])
+}
+
+model LivroEstante {
+  id        Int @id @default(autoincrement())
+  livroId   Int
+  estanteId Int
+  coluna    Int
+  linha     Int
+
+  livro   Livro   @relation(fields: [livroId], references: [id])
+  estante Estante @relation(fields: [estanteId], references: [id])
+
+  @@unique([livroId, estanteId])
+}
+
+enum EstanteCargo {
+  DONO
+  MEMBRO
+}
+
+enum Formato {
+  FISICO
+  DIGITAL
+}
+
+enum StatusLivro {
+  NA_ESTANTE
+  LENDO
+  EMPRESTADO
+  PENDENTE
+}

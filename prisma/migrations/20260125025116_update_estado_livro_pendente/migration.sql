@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Livro" ALTER COLUMN "status" SET DEFAULT 'PENDENTE';

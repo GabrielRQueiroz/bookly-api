@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Genero" ADD COLUMN     "corHexa" TEXT NOT NULL DEFAULT '#611066';

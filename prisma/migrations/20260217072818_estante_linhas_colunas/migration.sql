@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Estante" ADD COLUMN     "colunas" INTEGER NOT NULL DEFAULT 1,
+ADD COLUMN     "linhas" INTEGER NOT NULL DEFAULT 1;

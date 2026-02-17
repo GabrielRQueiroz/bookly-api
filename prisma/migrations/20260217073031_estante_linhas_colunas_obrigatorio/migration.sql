@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Estante" ALTER COLUMN "colunas" DROP DEFAULT,
+ALTER COLUMN "linhas" DROP DEFAULT;
