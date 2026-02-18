@@ -10,14 +10,25 @@ export class EstanteService {
 
   create(createEstanteDto: CreateEstanteDto, usuarioId: Usuario['id']) {
     return this.prisma.estante.create({
+      include: {
+        estanteUsuarios: {
+          include: {
+            usuario: true,
+          },
+        },
+      },
       data: {
         nome: createEstanteDto.nome,
         linhas: createEstanteDto.linhas,
         colunas: createEstanteDto.colunas,
         estanteUsuarios: {
           create: {
-            usuarioId: usuarioId,
             cargo: 'DONO',
+            usuario: {
+              connect: {
+                id: usuarioId,
+              },
+            },
           },
         },
       },
