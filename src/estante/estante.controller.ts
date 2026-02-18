@@ -37,6 +37,11 @@ export class EstanteController {
     return this.estanteService.findOne(+id, usuario.id);
   }
 
+  @Get(':id/usuarios')
+  findMembros(@Param('id') id: string, @UsuarioAtivo() usuario: Usuario) {
+    return this.estanteService.listUsuarios(+id, usuario.id);
+  }
+  
   @Patch(':id')
   update(
     @Param('id') id: string,

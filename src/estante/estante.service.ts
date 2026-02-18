@@ -29,32 +29,78 @@ export class EstanteService {
   }
 
   async findAll(usuarioId: Usuario['id']) {
-    return {
-      dono: await this.prisma.estante.findMany({
-        where: {
-          usuarios: {
-            some: {
-              usuarioId: usuarioId,
-              cargo: 'DONO',
+    const dono = await this.prisma.estante.findMany({
+      include: {
+        usuarios: {
+          select: {
+            cargo: true,
+            usuario: {
+              select: { nome: true },
             },
           },
         },
-      }),
-      convidado: await this.prisma.estante.findMany({
-        where: {
-          usuarios: {
-            some: {
-              usuarioId: usuarioId,
-              cargo: 'MEMBRO',
+      },
+      where: {
+        usuarios: {
+          some: {
+            usuarioId: usuarioId,
+            cargo: 'DONO',
+          },
+        },
+      },
+    });
+    const convidado = await this.prisma.estante.findMany({
+      include: {
+        usuarios: {
+          select: {
+            cargo: true,
+            usuario: {
+              select: { nome: true },
             },
           },
         },
-      }),
+      },
+      where: {
+        usuarios: {
+          some: {
+            usuarioId: usuarioId,
+            cargo: 'MEMBRO',
+          },
+        },
+      },
+    });
+    const result = {
+      dono: dono.map((estante) => ({
+        ...estante,
+        usuarios: estante.usuarios.map((relacao) => ({
+          cargo: relacao.cargo,
+          nome: relacao.usuario.nome,
+        })),
+      })),
+      convidado: convidado.map((estante) => ({
+        ...estante,
+        usuarios: estante.usuarios.map((relacao) => ({
+          cargo: relacao.cargo,
+          nome: relacao.usuario.nome,
+        })),
+      })),
     };
+    return result;
   }
 
-  findOne(id: number, usuarioId: Usuario['id']) {
-    return this.prisma.estante.findFirst({
+  async findOne(id: number, usuarioId: Usuario['id']) {
+    const estante = await this.prisma.estante.findFirst({
+      include: {
+        usuarios: {
+          include: {
+            usuario: {
+              omit: {
+                senha: true,
+              },
+            },
+          },
+        },
+      },
       where: {
         id: id,
         usuarios: {
@@ -64,6 +110,51 @@ export class EstanteService {
         },
       },
     });
+
+    if (!estante) {
+      throw new ForbiddenException('Estante não encontrada');
+    }
+
+    return {
+      ...estante,
+      usuarios: estante.usuarios.map((relacao) => ({
+        cargo: relacao.cargo,
+        ...relacao.usuario,
+      })),
+    };
+  }
+
+  async listUsuarios(id: number, usuarioId: Usuario['id']) {
+    const estante = await this.prisma.estante.findFirst({
+      include: {
+        usuarios: {
+          include: {
+            usuario: {
+              omit: {
+                senha: true,
+              },
+            },
+          },
+        },
+      },
+      where: {
+        id: id,
+        usuarios: {
+          some: {
+            usuarioId: usuarioId,
+          },
+        },
+      },
+    });
+
+    if (!estante) {
+      throw new ForbiddenException('Estante não encontrada');
+    }
+
+    return estante.usuarios.map((relacao) => ({
+      cargo: relacao.cargo,
+      ...relacao.usuario,
+    }));
   }
 
   async update(
