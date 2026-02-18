@@ -1,7 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { AuthService } from '../auth.service';
 import jwtConfig from '../config/jwt.config';
 import { JwtPayload } from '../types/jwt';
 
@@ -10,6 +11,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     @Inject(jwtConfig.KEY)
     private readonly jwtTokenConfig: ConfigType<typeof jwtConfig>,
+    private readonly authService: AuthService,
   ) {
     const secret = jwtTokenConfig.secret;
     if (!secret) {
@@ -23,6 +25,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: JwtPayload) {
-    return { userId: payload.sub, email: payload.email };
+    if (!(await this.authService.verificarExistenciaUsuario(payload.sub))) {
+      throw new UnauthorizedException('JWT com conteúdo inválido');
+    }
+
+    return { id: payload.sub, email: payload.email };
   }
 }

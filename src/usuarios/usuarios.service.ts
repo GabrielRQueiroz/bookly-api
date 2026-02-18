@@ -6,14 +6,14 @@ export class UsuariosService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findOneById(id: string) {
-    return this.prisma.usuario.findUnique({
+    return this.prisma.usuario.findUniqueOrThrow({
       where: { id },
       omit: { senha: true, id: true },
     });
   }
 
   async findOneByEmail(email: string) {
-    return this.prisma.usuario.findUnique({
+    return this.prisma.usuario.findUniqueOrThrow({
       where: { email },
       omit: { senha: true, email: true },
     });

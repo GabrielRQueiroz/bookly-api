@@ -41,6 +41,14 @@ export class AuthService {
     return null;
   }
 
+  async verificarExistenciaUsuario(id: string): Promise<boolean> {
+    const user = await this.prisma.usuario.findUnique({
+      where: { id },
+    });
+
+    return !!user;
+  }
+
   async registrar(nome: string, email: string, senha: string) {
     const hash = await bcrypt.hash(senha, 10);
 
@@ -53,7 +61,9 @@ export class AuthService {
       usuario.email,
     );
 
-    return { usuario, access_token, refresh_token };
+    const { senha: _, ...usuarioSemSenha } = usuario;
+
+    return { usuario: usuarioSemSenha, access_token, refresh_token };
   }
 
   async login(usuario: Omit<Usuario, 'senha'>) {

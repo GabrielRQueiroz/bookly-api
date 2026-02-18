@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { Usuario } from 'generated/prisma/client';
+import { Usuario } from 'src/common/decorators/usuario-ativo.decorator';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateEstanteDto } from './dto/create-estante.dto';
 import { UpdateEstanteDto } from './dto/update-estante.dto';
@@ -10,18 +10,11 @@ export class EstanteService {
 
   create(createEstanteDto: CreateEstanteDto, usuarioId: Usuario['id']) {
     return this.prisma.estante.create({
-      include: {
-        estanteUsuarios: {
-          include: {
-            usuario: true,
-          },
-        },
-      },
       data: {
         nome: createEstanteDto.nome,
-        linhas: createEstanteDto.linhas,
         colunas: createEstanteDto.colunas,
-        estanteUsuarios: {
+        linhas: createEstanteDto.linhas,
+        usuarios: {
           create: {
             cargo: 'DONO',
             usuario: {
@@ -39,7 +32,7 @@ export class EstanteService {
     return {
       dono: await this.prisma.estante.findMany({
         where: {
-          estanteUsuarios: {
+          usuarios: {
             some: {
               usuarioId: usuarioId,
               cargo: 'DONO',
@@ -49,7 +42,7 @@ export class EstanteService {
       }),
       convidado: await this.prisma.estante.findMany({
         where: {
-          estanteUsuarios: {
+          usuarios: {
             some: {
               usuarioId: usuarioId,
               cargo: 'MEMBRO',
@@ -64,7 +57,7 @@ export class EstanteService {
     return this.prisma.estante.findFirst({
       where: {
         id: id,
-        estanteUsuarios: {
+        usuarios: {
           some: {
             usuarioId: usuarioId,
           },
@@ -92,7 +85,7 @@ export class EstanteService {
     return this.prisma.estante.updateMany({
       where: {
         id: id,
-        estanteUsuarios: {
+        usuarios: {
           some: {
             usuarioId: usuarioId,
             cargo: 'DONO',
@@ -120,7 +113,7 @@ export class EstanteService {
     return this.prisma.estante.deleteMany({
       where: {
         id: id,
-        estanteUsuarios: {
+        usuarios: {
           some: {
             usuarioId: usuarioId,
             cargo: 'DONO',

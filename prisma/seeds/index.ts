@@ -171,7 +171,7 @@ async function main() {
       generos: {
         connect: [{ id: 9 }],
       },
-      livroEstantes: {
+      estantes: {
         create: {
           estanteId: 1,
           linha: 4,

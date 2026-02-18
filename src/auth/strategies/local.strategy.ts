@@ -9,18 +9,16 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     super({
       usernameField: 'email',
       passwordField: 'senha',
-      passReqToCallback: true,
     });
   }
 
-  async validate(req: any, email: string, senha: string) {
+  async validate(email: string, senha: string) {
     const user = await this.authService.validarUsuario(email, senha);
 
     if (!user) {
-      throw new UnauthorizedException('Credenciais inválidas');
+      throw new UnauthorizedException('Usuário ou senha inválidos');
     }
 
-    req.usuario = user;
     return user;
   }
 }

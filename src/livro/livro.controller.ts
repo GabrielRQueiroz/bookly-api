@@ -12,7 +12,6 @@ import { CreateLivroDto } from './dto/create-livro.dto';
 import { UpdateLivroDto } from './dto/update-livro.dto';
 import { LivroService } from './livro.service';
 import { ListLivrosQuery } from './query/list-livros.query';
-import { UsuarioAtivo } from 'src/common/decorators/usuario-ativo.decorator';
 
 @Controller('livro')
 export class LivroController {
