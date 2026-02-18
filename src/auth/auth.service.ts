@@ -6,6 +6,7 @@ import { Usuario } from 'generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import refreshConfig from './config/refresh.config';
 import { JwtPayload } from './types/jwt';
+import { LocalRequest } from './types/requests';
 
 @Injectable()
 export class AuthService {
@@ -66,7 +67,7 @@ export class AuthService {
     return { usuario: usuarioSemSenha, access_token, refresh_token };
   }
 
-  async login(usuario: Omit<Usuario, 'senha'>) {
+  async login(usuario: LocalRequest) {
     const { access_token, refresh_token } = await this.gerarTokens(
       usuario.id,
       usuario.email,
@@ -75,8 +76,8 @@ export class AuthService {
     return { usuario, access_token, refresh_token };
   }
 
-  async reautenticar(usuario: Omit<Usuario, 'senha'>) {
-    const payload: JwtPayload = { sub: usuario.id, email: usuario.email };
+  async reautenticar(id: string, email: string) {
+    const payload: JwtPayload = { sub: id, email: email };
 
     const access_token = this.jwt.sign(payload);
 

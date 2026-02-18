@@ -6,7 +6,7 @@ export type Usuario = {
 };
 
 export const UsuarioAtivo = createParamDecorator(
-  (_: unknown, ctx: ExecutionContext): Usuario => {
+  (_: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
     return request.user;
   },
