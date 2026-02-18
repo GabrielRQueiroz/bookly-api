@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Usuario } from 'src/common/decorators/usuario-ativo.decorator';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateEstanteDto } from './dto/create-estante.dto';
@@ -94,7 +98,7 @@ export class EstanteService {
         livros: {
           include: {
             livro: true,
-          }
+          },
         },
         usuarios: {
           include: {
@@ -122,6 +126,7 @@ export class EstanteService {
 
     return {
       ...estante,
+      cargo: estante.usuarios.find((u) => u.usuarioId === usuarioId)?.cargo,
       livros: estante.livros.map((relacao) => ({
         ...relacao.livro,
         linha: relacao.linha,
@@ -140,7 +145,7 @@ export class EstanteService {
         livros: {
           include: {
             livro: true,
-          }
+          },
         },
         usuarios: {
           include: {
