@@ -41,6 +41,11 @@ export class EstanteController {
   findMembros(@Param('id') id: string, @UsuarioAtivo() usuario: Usuario) {
     return this.estanteService.listUsuarios(+id, usuario.id);
   }
+
+  @Get(':id/livros')
+  findLivros(@Param('id') id: string, @UsuarioAtivo() usuario: Usuario) {
+    return this.estanteService.listLivros(+id, usuario.id);
+  }
   
   @Patch(':id')
   update(
