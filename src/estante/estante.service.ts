@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Usuario } from 'src/common/decorators/usuario-ativo.decorator';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateEstanteDto } from './dto/create-estante.dto';
@@ -91,6 +91,11 @@ export class EstanteService {
   async findOne(id: number, usuarioId: Usuario['id']) {
     const estante = await this.prisma.estante.findFirst({
       include: {
+        livros: {
+          include: {
+            livro: true,
+          }
+        },
         usuarios: {
           include: {
             usuario: {
@@ -112,16 +117,60 @@ export class EstanteService {
     });
 
     if (!estante) {
-      throw new ForbiddenException('Estante não encontrada');
+      throw new NotFoundException('Estante não encontrada');
     }
 
     return {
       ...estante,
+      livros: estante.livros.map((relacao) => ({
+        ...relacao.livro,
+        linha: relacao.linha,
+        coluna: relacao.coluna,
+      })),
       usuarios: estante.usuarios.map((relacao) => ({
         cargo: relacao.cargo,
         ...relacao.usuario,
       })),
     };
+  }
+
+  async listLivros(id: number, usuarioId: Usuario['id']) {
+    const estante = await this.prisma.estante.findFirst({
+      include: {
+        livros: {
+          include: {
+            livro: true,
+          }
+        },
+        usuarios: {
+          include: {
+            usuario: {
+              omit: {
+                senha: true,
+              },
+            },
+          },
+        },
+      },
+      where: {
+        id: id,
+        usuarios: {
+          some: {
+            usuarioId: usuarioId,
+          },
+        },
+      },
+    });
+
+    if (!estante) {
+      throw new NotFoundException('Estante não encontrada');
+    }
+
+    return estante.livros.map((relacao) => ({
+      ...relacao.livro,
+      linha: relacao.linha,
+      coluna: relacao.coluna,
+    }));
   }
 
   async listUsuarios(id: number, usuarioId: Usuario['id']) {
@@ -148,7 +197,7 @@ export class EstanteService {
     });
 
     if (!estante) {
-      throw new ForbiddenException('Estante não encontrada');
+      throw new NotFoundException('Estante não encontrada');
     }
 
     return estante.usuarios.map((relacao) => ({
